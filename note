@@ -1,0 +1,124 @@
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState, useContext } from "react";
+import { Text } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StreamChat } from "stream-chat";
+import { OverlayProvider, Chat, Streami18n } from "stream-chat-expo";
+import messaging from "@react-native-firebase/messaging";
+
+import AuthContext from "./contexts/Authentication";
+{import { createContext } from "react";
+
+const AuthContext = createContext({
+  userId: "",
+  setUserId: (newUserID: string) => {},
+});
+
+export default AuthContext;}
+
+import useCachedResources from "./hooks/useCachedResources";
+{import { FontAwesome } from '@expo/vector-icons';
+import * as Font from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+import * as React from 'react';
+
+export default function useCachedResources() {
+  const [isLoadingComplete, setLoadingComplete] = React.useState(false);
+
+  // Load any resources or data that we need prior to rendering the app
+  React.useEffect(() => {
+    async function loadResourcesAndDataAsync() {
+      try {
+        SplashScreen.preventAutoHideAsync();
+
+        // Load fonts
+        await Font.loadAsync({
+          ...FontAwesome.font,
+          'space-mono': require('../assets/fonts/SpaceMono-Regular.ttf'),
+        });
+      } catch (e) {
+        // We might want to provide this error information to an error reporting service
+        console.warn(e);
+      } finally {
+        setLoadingComplete(true);
+        SplashScreen.hideAsync();
+      }
+    }
+
+    loadResourcesAndDataAsync();
+  }, []);
+
+  return isLoadingComplete;
+}}
+
+import useColorScheme from "./hooks/useColorScheme";
+{import { ColorSchemeName, useColorScheme as _useColorScheme } from 'react-native';
+
+// The useColorScheme value is always either light or dark, but the built-in
+// type suggests that it can be null. This will not happen in practice, so this
+// makes it a bit easier to work with.
+export default function useColorScheme(): NonNullable<ColorSchemeName> {
+  return _useColorScheme() as NonNullable<ColorSchemeName>;
+}}
+
+import Navigation from "./navigation";
+
+
+const API_KEY = "ubf7nmmqwd9y";
+const client = StreamChat.getInstance(API_KEY);
+
+const streami18n = new Streami18n({ language: "hi" });
+
+export default function App() {
+  const isLoadingComplete = useCachedResources();
+
+  const [userId, setUserId] = useState("");
+
+  const requestPermission = async () => {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      console.log("Authorization status:", authStatus);
+    }
+  };
+
+  const registerDevice = async () => {
+    const token = await messaging().getToken();
+    await client.addDevice(token, "firebase");
+  };
+
+  useEffect(() => {
+    if (userId) {
+      // register device should be called only if user is authenticated
+      registerDevice();
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    requestPermission();
+  }, []);
+
+  useEffect(() => {
+    return () => client.disconnectUser();
+  }, []);
+
+  if (!isLoadingComplete) {
+    return null;
+  } else {
+    return (
+      <SafeAreaProvider>
+        <AuthContext.Provider value={{ userId, setUserId }}>
+          <OverlayProvider i18nInstance={streami18n}>
+            <Chat client={client} i18nInstance={streami18n}>
+              <Navigation colorScheme="light" />
+            </Chat>
+          </OverlayProvider>
+          <StatusBar />
+        </AuthContext.Provider>
+      </SafeAreaProvider>
+    );
+  }
+}
