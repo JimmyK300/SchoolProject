@@ -19,7 +19,7 @@ function StartScreen() {
     <>
       <Image
         style={styles.image}
-        source={require("../images/start.jpg")}
+        source={require("../images/cover.jpg")}
       ></Image>
       {/* <BlurView style={styles.container} intensity={30}>
         <InputArea placeholder={"Username or email"} />
@@ -31,7 +31,7 @@ function StartScreen() {
       </View>
       {loggedIn && (
         <>
-          <Image style={styles.image} source={require("../images/start.jpg")} />
+          <Image style={styles.image} source={require("../images/cover.jpg")} />
           <KeyboardAvoidingView behavior="position" style={styles.outer}>
             <View style={styles.container}>
               <InputArea placeholder={"Username or email"} />

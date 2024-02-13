@@ -1,121 +1,237 @@
-import React, {
-  useState,
-  useEffect,
-  useLayoutEffect,
-  useCallback,
-} from "react";
-import { TouchableOpacity, Text, View } from "react-native";
-import { GiftedChat, Bubblez, Bubble } from "react-native-gifted-chat";
+import React, { useContext, useEffect, useState } from "react";
+import { Bubble, GiftedChat } from "react-native-gifted-chat";
 import {
-  collection,
-  addDoc,
-  orderBy,
-  query,
-  onSnapshot,
-} from "firebase/firestore";
-import { signOut } from "firebase/auth";
-import { auth, database } from "../../firebase";
-import { useNavigation } from "@react-navigation/native";
-import { AntDesign } from "@expo/vector-icons";
-import { COLORS, FONT, SIZES, SHADOWS } from "../../constants/theme";
+  Composer,
+  InputToolbar,
+  Send,
+  Actions,
+} from "react-native-gifted-chat";
+import {
+  SafeAreaView,
+  View,
+  Dimensions,
+  Platform,
+  Text,
+  TextInput,
+  Image,
+  StyleSheet,
+} from "react-native";
+import * as Device from "expo-device";
 
-export default function Chat() {
-  const [messages, setMessages] = useState([]);
-  const navigation = useNavigation();
+import { COLORS } from "../../constants";
+import { chatkitty } from "../../chatkitty";
+import Loading from "../../components/loading";
+import { AuthContext } from "../../context/AuthProvider";
+import InputArea from "../components/InputArea";
+import SuperSvg from "../components/SuperSvg";
 
-  const onSignOut = () => {
-    signOut(auth).catch((error) => console.log("Error logging out: ", error));
+export default function ChatScreen({ route, navigation }) {
+  const { user } = useContext(AuthContext);
+  const { channel } = route.params;
+  const isOldIphone = () => {
+    const compare = Device.modelName.slice(7, 9);
+    let isntSim = true;
+    if (compare === "or" && Device.modelName === "Simulator iOS") {
+      isntSim = false;
+    }
+    return compare === "SE" || Number(compare) <= 8 || isntSim;
   };
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          style={{
-            marginRight: 10,
-          }}
-          onPress={onSignOut}
-        >
-          <AntDesign
-            name="logout"
-            size={24}
-            color={COLORS.gray}
-            style={{ marginRight: 10 }}
-          />
-        </TouchableOpacity>
-      ),
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadEarlier, setLoadEarlier] = useState(false);
+  const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
+  const [messagePaginator, setMessagePaginator] = useState(null);
+
+  useEffect(() => {
+    const startChatSessionResult = chatkitty.startChatSession({
+      channel: channel,
+      onMessageReceived: (message) => {
+        setMessages((currentMessages) =>
+          GiftedChat.append(currentMessages, [mapMessage(message)])
+        );
+      },
     });
+
+    chatkitty
+      .listMessages({
+        channel: channel,
+      })
+      .then((result) => {
+        setMessages(result.paginator.items.map(mapMessage));
+
+        setMessagePaginator(result.paginator);
+        setLoadEarlier(result.paginator.hasNextPage);
+
+        setLoading(false);
+      });
+
+    return startChatSessionResult.session.end;
+  }, [user, channel]);
+
+  async function handleSend(pendingMessages) {
+    await chatkitty.sendMessage({
+      channel: channel,
+      body: pendingMessages[0].text,
+    });
+  }
+
+  async function handleLoadEarlier() {
+    if (!messagePaginator.hasNextPage) {
+      setLoadEarlier(false);
+
+      return;
+    }
+
+    setIsLoadingEarlier(true);
+
+    const nextPaginator = await messagePaginator.nextPage();
+
+    setMessagePaginator(nextPaginator);
+
+    setMessages((currentMessages) =>
+      GiftedChat.prepend(currentMessages, nextPaginator.items.map(mapMessage))
+    );
+
+    setIsLoadingEarlier(false);
+  }
+
+  useEffect(() => {
+    navigation.getParent()?.setOptions({
+      tabBarStyle: {
+        display: "none",
+      },
+    });
+    return () =>
+      navigation.getParent()?.setOptions({
+        tabBarStyle: undefined,
+      });
   }, [navigation]);
 
-  useLayoutEffect(() => {
-    const collectionRef = collection(database, "chats");
-    const q = query(collectionRef, orderBy("createdAt", "desc"));
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      console.log("querySnapshot unsusbscribe");
-      setMessages(
-        querySnapshot.docs.map((doc) => ({
-          _id: doc.data()._id,
-          createdAt: doc.data().createdAt.toDate(),
-          text: doc.data().text,
-          user: doc.data().user,
-        }))
-      );
-    });
-    return unsubscribe;
-  }, []);
-
-  const onSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
-    );
-    // setMessages([...messages, ...messages]);
-    const { _id, createdAt, text, user } = messages[0];
-    addDoc(collection(database, "chats"), {
-      _id,
-      createdAt,
-      text,
-      user,
-    });
-  }, []);
-  const renderBubble = (props) => {
+  function renderBubble(props) {
     return (
       <Bubble
         {...props}
         wrapperStyle={{
-          right: {
-            backgroundColor: COLORS.primary,
-          },
           left: {
-            backgroundColor: COLORS.bubbleGray,
+            backgroundColor: "#d3d3d3",
           },
         }}
       />
     );
-  };
+  }
+
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
-    // <>
-    //   {messages.map(message => (
-    //     <Text key={message._id}>{message.text}</Text>
-    //   ))}
-    // </>
-    <GiftedChat
-      messages={messages}
-      showAvatarForEveryMessage={false}
-      showUserAvatar={false}
-      onSend={(messages) => onSend(messages)}
-      renderBubble={renderBubble}
-      messagesContainerStyle={{
-        backgroundColor: COLORS.white,
-      }}
-      textInputStyle={{
-        backgroundColor: "#fff",
-        borderRadius: 20,
-      }}
-      user={{
-        _id: auth?.currentUser?.email,
-        avatar: "https://i.pravatar.cc/300",
-      }}
-    />
+    <SafeAreaView style={{ flex: 1 }}>
+      <GiftedChat
+        messages={messages}
+        onSend={handleSend}
+        user={mapUser(user)}
+        loadEarlier={loadEarlier}
+        isLoadingEarlier={isLoadingEarlier}
+        onLoadEarlier={handleLoadEarlier}
+        renderBubble={renderBubble}
+        messagesContainerStyle={{ backgroundColor: COLORS.darkBg }}
+        bottomOffset={isOldIphone() ? -4 : 32}
+        minInputToolbarHeight={70}
+        renderInputToolbar={(props) => MessengerBarContainer(props)}
+      />
+    </SafeAreaView>
   );
 }
+
+function mapMessage(message) {
+  return {
+    _id: message.id,
+    text: message.body,
+    createdAt: new Date(message.createdTime),
+    user: mapUser(message.user),
+  };
+}
+
+function mapUser(user) {
+  return {
+    _id: user.id,
+    name: user.displayName,
+    avatar: user.displayPictureUrl,
+  };
+}
+
+const MessengerBarContainer = (props) => {
+  const Icon = require("../icons/paths.json");
+
+  return (
+    <View style={{ backgroundColor: COLORS.darkBg, height: 200 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          padding: 20,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {/* <Actions
+          {...props}
+          containerStyle={{
+            backgroundColor: "white",
+          }}
+        /> */}
+        <View style={{ marginHorizontal: 8, flex: 1, alignItems: "center" }}>
+          <Composer
+            {...props}
+            placeholderTextColor={COLORS.darkPlaceHolder}
+            placeholder="Write a message"
+            textInputStyle={style.input}
+            multiline={false}
+          />
+        </View>
+        <Send
+          {...props}
+          alwaysShowSend={true}
+          containerStyle={{ justifyContent: "center" }}
+        >
+          <View style={{ justifyContent: "center" }}>
+            <SuperSvg
+              height={50}
+              width={50}
+              path={Icon["send"]}
+              color={COLORS.primary}
+              viewBox="0 0 25 25"
+            />
+          </View>
+        </Send>
+      </View>
+      <View></View>
+    </View>
+  );
+};
+
+// const handleOnPress = useCallbackOne(() => {
+//   if (text && onSend) {
+//       onSend({ text: text.trim() }, true);
+//   }
+// }, [text, onSend]);
+// const showSend = useMemoOne(() => alwaysShowSend || (text && text.trim().length > 0), [alwaysShowSend, text]);
+// if (!showSend) {
+//   return null;
+// }
+
+const style = StyleSheet.create({
+  input: {
+    backgroundColor: COLORS.darkButton,
+    color: COLORS.darkText,
+    marginHorizontal: 16,
+    fontSize: 16,
+    borderRadius: 30,
+    padding: 12,
+    width: "100%",
+    textAlignVertical: "center",
+    lineHeight: 0,
+    marginTop: 0,
+    marginBottom: 0,
+  },
+});

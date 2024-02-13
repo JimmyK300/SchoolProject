@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { IconButton, Title } from "react-native-paper";
 
-import { chatkitty } from "../../chatkitty";
+import { chatkitty } from "../chatkitty";
 import FormButton from "../components/formButton";
 import FormInput from "../components/formInput";
-import { AuthContext } from "../../config/authProvider";
 
 export default function CreateChannelScreen({ navigation }) {
   const [channelName, setChannelName] = useState("");
@@ -17,20 +16,12 @@ export default function CreateChannelScreen({ navigation }) {
           type: "PUBLIC",
           name: channelName,
         })
-        .then(() => navigation.navigate("Home"));
+        .then(() => navigation.goBack());
     }
   }
 
   return (
     <View style={styles.rootContainer}>
-      <View style={styles.closeButtonContainer}>
-        <IconButton
-          icon="close-circle"
-          size={36}
-          iconColor="#5b3a70"
-          onPress={() => navigation.goBack()}
-        />
-      </View>
       <View style={styles.innerContainer}>
         <Title style={styles.title}>Create a new channel</Title>
         <FormInput

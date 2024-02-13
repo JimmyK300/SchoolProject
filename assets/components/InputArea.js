@@ -1,28 +1,28 @@
 import React from "react";
 import { StyleSheet, Text, View, TextInput } from "react-native";
 
-function InputArea(props) {
+export default function InputArea(props) {
   return (
-    <View style={styles.container}>
-      <TextInput style={styles.input} placeholder={props.placeholder} />
+    <View
+      style={[
+        props.containerStyle,
+        {
+          flex: 1,
+          alignItems: "center",
+        },
+      ]}
+    >
+      <TextInput
+        {...props}
+        style={props.style}
+        placeholder={props.placeholder}
+        placeholderTextColor={props.placeholderTextColor}
+        testID={props.placeholder}
+        accessible
+        accessibilityLabel={props.placeholder}
+        editable={true}
+        autoFocus={true}
+      />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    fontSize: 18,
-    borderRadius: 20,
-    backgroundColor: "white",
-  },
-  container: {
-    margin: 10,
-    width: "90%",
-  },
-});
-
-export default InputArea;

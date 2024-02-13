@@ -9,6 +9,11 @@ const COLORS = {
 
   white: "#F3F4F8",
   lightWhite: "#FAFAFC",
+
+  darkText: "#e0e0e0",
+  darkBg: "#1e1e1e",
+  darkButton: "#282828",
+  darkPlaceHolder: "#979797",
 };
 
 const FONT = {

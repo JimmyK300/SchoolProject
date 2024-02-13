@@ -2,10 +2,10 @@ import React, { useContext, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { IconButton, Title } from "react-native-paper";
 
-import FormButton from "../components/FormButton";
-import FormInput from "../components/FormInput";
-import Loading from "../components/Loading";
-import { AuthContext, AuthProvider } from "../../config/authProvider";
+import FormButton from "../components/formButton";
+import FormInput from "../components/formInput";
+import Loading from "../components/loading";
+import { AuthContext } from "../context/AuthProvider";
 
 export default function SignupScreen({ navigation }) {
   const [displayName, setDisplayName] = useState("");
@@ -14,9 +14,9 @@ export default function SignupScreen({ navigation }) {
 
   const { register, loading } = useContext(AuthContext);
 
-  // if (loading) {
-  //   return <Loading />;
-  // }
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <View style={styles.container}>
@@ -45,12 +45,12 @@ export default function SignupScreen({ navigation }) {
         labelStyle={styles.loginButtonLabel}
         onPress={() => register(displayName, email, password)}
       />
-      <FormButton
-        title="Login here"
-        modeValue="text"
-        uppercase={false}
-        labelStyle={styles.navButtonText}
-        onPress={() => navigation.navigate("Login")}
+      <IconButton
+        icon="keyboard-backspace"
+        size={30}
+        style={styles.navButton}
+        iconColor="#5b3a70"
+        onPress={() => navigation.goBack()}
       />
     </View>
   );

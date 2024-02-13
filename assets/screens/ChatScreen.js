@@ -1,87 +1,68 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Bubble, GiftedChat } from "react-native-gifted-chat";
+// import React from "react";
+// import { NavigationContainer } from "@react-navigation/native";
+// import { View, Text, SafeAreaView, FlatList, TextInput } from "react-native";
+// import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 
-import { chatkitty } from "../../chatkitty";
-import Loading from "../components/Loading";
-import { AuthContext } from "../../config/authProvider";
+// function ChatScreenNoHeader() {
+//   return (
+//     <View>
+//       <View>
+//         <Text>chat</Text>
+//       </View>
+//       <View>
+//         <TextInput placeholder="write a message"></TextInput>
+//       </View>
+//     </View>
+//   );
+// }
 
-export default function ChatScreen({ route }) {
-  const { user } = useContext(AuthContext);
-  const { channel } = route.params;
+// const handdleSubmit = async () => {
+//   if (!state.result[0]) return;
+//   try {
+//     fetch data from chat Gpt
+//   } catch (e) {
+//     console.log(e);
+//   }
+// };
 
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
+// main();
 
-  useEffect(() => {
-    const startChatSessionResult = chatkitty.startChatSession({
-      channel: channel,
-      onMessageReceived: (message) => {
-        setMessages((currentMessages) =>
-          GiftedChat.append(currentMessages, [mapMessage(message)])
-        );
-      },
-    });
+// function chatDisplay() {}
 
-    chatkitty
-      .listMessages({
-        channel: channel,
-      })
-      .then((result) => {
-        setMessages(result.paginator.items.map(mapMessage));
+// function ChatScreen() {
+//   const Stack = createMaterialTopTabNavigator();
+//   const chatName = "Chat GPT";
+//   return (
+//     <Stack.Navigator>
+//       <Stack.Screen
+//         name="ChatInside"
+//         component={ChatScreenNoHeader}
+//         options={{ title: chatName }}
+//       />
+//     </Stack.Navigator>
+//   );
+// }
 
-        setLoading(false);
-      });
+// export default ChatScreen;
 
-    return startChatSessionResult.session.end;
-  }, [user, channel]);
+import React, { useState, createContext, useContext, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { View, ActivityIndicator } from "react-native";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../config/firebase";
+import Login from "./Login";
+import Signup from "./SignUp";
+import Chat from "./Chat";
+import Home from "./Home";
 
-  async function handleSend(pendingMessages) {
-    await chatkitty.sendMessage({
-      channel: channel,
-      body: pendingMessages[0].text,
-    });
-  }
+const Stack = createStackNavigator();
 
-  function renderBubble(props) {
-    return (
-      <Bubble
-        {...props}
-        wrapperStyle={{
-          left: {
-            backgroundColor: "#d3d3d3",
-          },
-        }}
-      />
-    );
-  }
-
-  // if (loading) {
-  //   return <Loading />;
-  // }
-
+export default function ChatScreen() {
   return (
-    <GiftedChat
-      messages={messages}
-      onSend={handleSend}
-      user={mapUser(user)}
-      renderBubble={renderBubble}
-    />
+    <Stack.Navigator defaultScreenOptions={Home}>
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Chats" component={Chat} />
+    </Stack.Navigator>
   );
-}
-
-function mapMessage(message) {
-  return {
-    _id: message.id,
-    text: message.body,
-    createdAt: new Date(message.createdTime),
-    user: mapUser(message.user),
-  };
-}
-
-function mapUser(user) {
-  return {
-    _id: user.id,
-    name: user.displayName,
-    avatar: user.displayPictureUrl,
-  };
 }

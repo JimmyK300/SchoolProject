@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import * as React from "react";
 import StartScreen from "./assets/screens/StartScreen";
-import HomeScreen from "./assets/screens/HomeScreen";
+import HomeScreen from "../../screens/HomeScreen";
 import IconButton from "./assets/components/IconButton";
 import HomeRow from "./assets/components/HomeRow";
 //import * as React from "react";

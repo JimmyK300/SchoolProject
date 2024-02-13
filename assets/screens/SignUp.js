@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,12 +12,10 @@ import {
   Alert,
 } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase";
+import { auth } from "../../config/firebase";
 import { COLORS, FONT, SHADOWS, SIZES } from "../../constants";
-import Loading from "../components/Loading";
-import { AuthContext } from "../../config/authProvider";
 
-const backImage = require("../images/start.jpg");
+const backImage = require("../images/cover.jpg");
 
 export default function Signup({ navigation }) {
   const [email, setEmail] = useState("");
@@ -30,12 +28,6 @@ export default function Signup({ navigation }) {
         .catch((err) => Alert.alert("Login error", err.message));
     }
   };
-
-  const { loading } = useContext(AuthContext);
-
-  // if (loading) {
-  //   return <Loading />;
-  // }
 
   return (
     <View style={styles.container}>

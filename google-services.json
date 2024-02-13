@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "284299047588",
+    "project_id": "messagestore-5018a",
+    "storage_bucket": "messagestore-5018a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284299047588:android:3106dc3f389016f7caac31",
+        "android_client_info": {
+          "package_name": "com.school.project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAQ53p40Rkf0jLknp4dLpTfJ5Ja0vkfKA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
