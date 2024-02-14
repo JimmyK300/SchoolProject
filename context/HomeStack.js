@@ -12,6 +12,7 @@ import ChatScreen from "../assets/screens/Chat";
 import { NavigationContainer } from "@react-navigation/native";
 import AccountScreen from "../assets/screens/AccountScreen";
 import BrowseChannelsScreen from "../assets/screens/BrowseChannelScreen";
+// import { NotificationContext } from "./NotificationProvider";
 
 const Stack = createStackNavigator();
 const ChatStack = createStackNavigator();
@@ -95,6 +96,20 @@ function ChatComponentOutside() {
 }
 
 export default function HomeStack() {
+  // const { registerForPushNotifications, sendNotification } =
+  //   useContext(NotificationContext);
+
+  // useEffect(() => {
+  //   registerForPushNotifications();
+
+  //   chatkitty.onNotificationReceived(async (notification) => {
+  //     await sendNotification({
+  //       title: notification.title,
+  //       body: notification.body,
+  //     });
+  //   });
+  // }, []);
+
   return (
     <HomeStacks.Navigator
       screenOptions={{ headerShown: false }}

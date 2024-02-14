@@ -21,18 +21,17 @@ export default {
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
+        // package: "com.school.project",
+        // googleServicesFile: "./google-services.json",
       },
     },
     web: {
       favicon: "./assets/favicon.png",
     },
-    // extra: {
-    //   apiKey: process.env.API_KEY,
-    //   authDomain: process.env.AUTH_DOMAIN,
-    //   projectId: process.env.PROJECT_ID,
-    //   storageBucket: process.env.STORAGE_BUCKET,
-    //   messagingSenderId: process.env.MESSAGING_SENDER_ID,
-    //   appId: process.env.APP_ID,
-    // },
+    extra: {
+      eas: {
+        projectId: "a3d48b08-f64a-4d42-a089-fa824e1003e5",
+      },
+    },
   },
 };

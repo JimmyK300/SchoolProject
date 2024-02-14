@@ -8,7 +8,6 @@ import Loading from "../components/loading";
 import AuthStack from "./AuthStack";
 import HomeStack from "./HomeStack";
 import { AuthContext } from "./AuthProvider";
-import ChatScreen from "../assets/screens/Chat";
 
 const BottomStack = createStackNavigator();
 
